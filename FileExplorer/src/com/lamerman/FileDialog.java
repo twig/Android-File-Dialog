@@ -23,8 +23,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.AndroidExplorer.R;
-
 public class FileDialog extends ListActivity {
 
 	private static final String ITEM_KEY = "key";
