@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -135,8 +133,6 @@ public class FileDialog extends ListActivity {
 		boolean useAutoSelection = dirPath.length() < currentPath.length();
 
 		Integer position = lastPositions.get(parentPath);
-		Logger.getLogger(getClass().getName()).log(Level.SEVERE,
-				"Getting position for " + parentPath);
 
 		getDirImpl(dirPath);
 
