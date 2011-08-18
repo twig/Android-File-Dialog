@@ -7,7 +7,7 @@
     <string name="select">Выбрать</string>
     <string name="file_name">Имя файла:</string>
     <string name="cancel">Отмена</string>
-    <string name="create">Создать</string>
+    <string name="create">Сохранить</string>
     <string name="no_data">Нет данных</string>
 	<color name="gray">#ffff0000</color>
 </resources>

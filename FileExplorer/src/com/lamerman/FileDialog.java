@@ -25,27 +25,26 @@ public class FileDialog extends ListActivity {
 
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
+	private static final String ROOT = "/";
 
 	public static final String START_PATH = "START_PATH";
 	public static final String RESULT_PATH = "RESULT_PATH";
+	public static final String SELECTION_MODE = "SELECTION_MODE";
 
-	private List<String> item = null;
 	private List<String> path = null;
-	private String root = "/";
 	private TextView myPath;
 	private EditText mFileName;
 	private ArrayList<HashMap<String, Object>> mList;
 
 	private Button selectButton;
-	private Button newButton;
-	private Button cancelButton;
-	private Button createButton;
 
 	private LinearLayout layoutSelect;
 	private LinearLayout layoutCreate;
 	private InputMethodManager inputManager;
 	private String parentPath;
-	private String currentPath = root;
+	private String currentPath = ROOT;
+
+	private int selectionMode = SelectionMode.MODE_CREATE;
 
 	private File selectedFile;
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
@@ -76,37 +75,38 @@ public class FileDialog extends ListActivity {
 			}
 		});
 
-		newButton = (Button) findViewById(R.id.fdButtonNew);
+		final Button newButton = (Button) findViewById(R.id.fdButtonNew);
 		newButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				layoutSelect.setVisibility(View.GONE);
-				layoutCreate.setVisibility(View.VISIBLE);
+				setCreateVisible(v);
 
 				mFileName.setText("");
 				mFileName.requestFocus();
 			}
 		});
 
+		selectionMode = getIntent().getIntExtra(SELECTION_MODE,
+				SelectionMode.MODE_CREATE);
+		if (selectionMode == SelectionMode.MODE_OPEN) {
+			newButton.setEnabled(false);
+		}
+
 		layoutSelect = (LinearLayout) findViewById(R.id.fdLinearLayoutSelect);
 		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
 		layoutCreate.setVisibility(View.GONE);
 
-		cancelButton = (Button) findViewById(R.id.fdButtonCancel);
+		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
 		cancelButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View v) {
-				layoutCreate.setVisibility(View.GONE);
-				layoutSelect.setVisibility(View.VISIBLE);
-
-				inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
-				unselect();
+				setSelectVisible(v);
 			}
 
 		});
-		createButton = (Button) findViewById(R.id.fdButtonCreate);
+		final Button createButton = (Button) findViewById(R.id.fdButtonCreate);
 		createButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -124,7 +124,7 @@ public class FileDialog extends ListActivity {
 		if (startPath != null) {
 			getDir(startPath);
 		} else {
-			getDir(root);
+			getDir(ROOT);
 		}
 	}
 
@@ -142,23 +142,28 @@ public class FileDialog extends ListActivity {
 
 	}
 
-	private void getDirImpl(String dirPath) {
+	private void getDirImpl(final String dirPath) {
 
-		myPath.setText(getText(R.string.location) + ": " + dirPath);
 		currentPath = dirPath;
 
-		item = new ArrayList<String>();
+		final List<String> item = new ArrayList<String>();
 		path = new ArrayList<String>();
 		mList = new ArrayList<HashMap<String, Object>>();
 
-		File f = new File(dirPath);
+		File f = new File(currentPath);
 		File[] files = f.listFiles();
+		if (files == null) {
+			currentPath = ROOT;
+			f = new File(currentPath);
+			files = f.listFiles();
+		}
+		myPath.setText(getText(R.string.location) + ": " + currentPath);
 
-		if (!dirPath.equals(root)) {
+		if (!currentPath.equals(ROOT)) {
 
-			item.add(root);
-			addItem(root, R.drawable.folder);
-			path.add(root);
+			item.add(ROOT);
+			addItem(ROOT, R.drawable.folder);
+			path.add(ROOT);
 
 			item.add("../");
 			addItem("../", R.drawable.folder);
@@ -217,13 +222,16 @@ public class FileDialog extends ListActivity {
 
 		File file = new File(path.get(position));
 
+		setSelectVisible(v);
+
 		if (file.isDirectory()) {
-			unselect();
+			selectButton.setEnabled(false);
 			if (file.canRead()) {
 				lastPositions.put(currentPath, position);
 				getDir(path.get(position));
 			} else {
-				new AlertDialog.Builder(this).setIcon(R.drawable.icon)
+				new AlertDialog.Builder(this)
+						.setIcon(R.drawable.icon)
 						.setTitle(
 								"[" + file.getName() + "] "
 										+ getText(R.string.cant_read_folder))
@@ -247,13 +255,13 @@ public class FileDialog extends ListActivity {
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-			unselect();
+			selectButton.setEnabled(false);
 
 			if (layoutCreate.getVisibility() == View.VISIBLE) {
 				layoutCreate.setVisibility(View.GONE);
 				layoutSelect.setVisibility(View.VISIBLE);
 			} else {
-				if (!currentPath.equals(root)) {
+				if (!currentPath.equals(ROOT)) {
 					getDir(parentPath);
 				} else {
 					return super.onKeyDown(keyCode, event);
@@ -266,7 +274,19 @@ public class FileDialog extends ListActivity {
 		}
 	}
 
-	private void unselect() {
+	private void setCreateVisible(View v) {
+		layoutCreate.setVisibility(View.VISIBLE);
+		layoutSelect.setVisibility(View.GONE);
+
+		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+		selectButton.setEnabled(false);
+	}
+
+	private void setSelectVisible(View v) {
+		layoutCreate.setVisibility(View.GONE);
+		layoutSelect.setVisibility(View.VISIBLE);
+
+		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		selectButton.setEnabled(false);
 	}
 }
