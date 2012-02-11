@@ -38,9 +38,14 @@ public class FileDialog extends ListActivity {
 	private static final String ITEM_IMAGE = "image";
 	private static final String ROOT = "/";
 
+	// This is used to configure the initial folder when it opens.
 	public static final String START_PATH = "START_PATH";
+	// Used to retrieve the path of the result file.
 	public static final String RESULT_PATH = "RESULT_PATH";
+	// Set to SelectionMode.MODE_OPEN to disable the "New" button.
 	public static final String SELECTION_MODE = "SELECTION_MODE";
+	// Set to hide the "myPath" TextView.
+	public static final String OPTION_CURRENT_PATH_IN_TITLEBAR = "OPTION_CURRENT_PATH_IN_TITLEBAR";
 
 	private List<String> path = null;
 	private TextView myPath;
@@ -56,11 +61,16 @@ public class FileDialog extends ListActivity {
 	private String currentPath = ROOT;
 
 	private int selectionMode = SelectionMode.MODE_CREATE;
+	
+	// True if the titlebar is to show the current folder. This will also hide the "myPath" view.
+	private boolean m_bTitlebarFolder = false;
 
 	private File selectedFile;
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
-	/** Called when the activity is first created. */
+	/**
+	 * Called when the activity is first created.
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -71,6 +81,15 @@ public class FileDialog extends ListActivity {
 		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
 
 		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+
+
+		// Hide the titlebar if needed
+		m_bTitlebarFolder = getIntent().getBooleanExtra(OPTION_CURRENT_PATH_IN_TITLEBAR, m_bTitlebarFolder);
+
+		if (m_bTitlebarFolder) {
+		    myPath.setVisibility(View.GONE);
+		}
+
 
 		selectButton = (Button) findViewById(R.id.fdButtonSelect);
 		selectButton.setEnabled(false);
@@ -173,7 +192,13 @@ public class FileDialog extends ListActivity {
 			f = new File(currentPath);
 			files = f.listFiles();
 		}
-		myPath.setText(getText(R.string.location) + ": " + currentPath);
+
+		if (m_bTitlebarFolder) {
+		    this.setTitle(currentPath);
+		}
+		else {
+		    myPath.setText(getText(R.string.location) + ": " + currentPath);
+		}
 
 		if (!currentPath.equals(ROOT)) {
 
