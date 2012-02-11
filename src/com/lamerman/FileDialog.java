@@ -23,6 +23,17 @@ import android.widget.TextView;
 
 public class FileDialog extends ListActivity {
 
+    // @see https://code.google.com/p/android-file-dialog/issues/detail?id=3
+    // @see http://twigstechtips.blogspot.com.au/2011/11/for-my-app-moustachify-everything-i-was.html
+    // This is purely a data storage class for saving information between rotations
+    private class LastConfiguration {
+        public String m_strCurrentPath;
+
+        public LastConfiguration(String currentPath) {
+            this.m_strCurrentPath = currentPath;
+        }
+    }
+
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
 	private static final String ROOT = "/";
@@ -120,11 +131,16 @@ public class FileDialog extends ListActivity {
 			}
 		});
 
-		String startPath = getIntent().getStringExtra(START_PATH);
-		if (startPath != null) {
-			getDir(startPath);
-		} else {
-			getDir(ROOT);
+		// Try to restore current path after screen rotation
+		LastConfiguration lastConfiguration = (LastConfiguration) getLastNonConfigurationInstance();
+
+		if (lastConfiguration != null) {
+		    getDir(lastConfiguration.m_strCurrentPath);
+		}
+		// New instance of FileDialog
+		else {
+		    String startPath = getIntent().getStringExtra(START_PATH);
+		    getDir(startPath != null ? startPath : ROOT);
 		}
 	}
 
@@ -288,5 +304,11 @@ public class FileDialog extends ListActivity {
 
 		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		selectButton.setEnabled(false);
+	}
+
+	// Remember the information when the screen is just about to be rotated.
+	// This information can be retrieved by using getLastNonConfigurationInstance()
+	public Object onRetainNonConfigurationInstance() {
+	    return new LastConfiguration(this.currentPath);
 	}
 }
