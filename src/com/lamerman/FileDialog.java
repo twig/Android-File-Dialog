@@ -41,6 +41,8 @@ public class FileDialog extends ListActivity {
 	public static final String START_PATH = "START_PATH";
 	// Used to retrieve the absolute filename of the result file.
 	public static final String RESULT_PATH = "RESULT_PATH";
+	// Used to retrieve the full folder of the result file.
+	public static final String RESULT_FOLDER = "RESULT_FOLDER";
 	// Set to SelectionMode.MODE_OPEN to disable the "New" button.
 	public static final String SELECTION_MODE = "SELECTION_MODE";
 	// Set to hide the "myPath" TextView.
@@ -104,6 +106,7 @@ public class FileDialog extends ListActivity {
 			public void onClick(View v) {
 				if (selectedFile != null) {
 					getIntent().putExtra(RESULT_PATH, selectedFile.getPath());
+					getIntent().putExtra(RESULT_FOLDER, currentPath);
 					setResult(RESULT_OK, getIntent());
 					finish();
 				}
@@ -155,6 +158,7 @@ public class FileDialog extends ListActivity {
 			public void onClick(View v) {
 				if (mFileName.getText().length() > 0) {
 					getIntent().putExtra(RESULT_PATH, currentPath + "/" + mFileName.getText());
+					getIntent().putExtra(RESULT_FOLDER, currentPath);
 					setResult(RESULT_OK, getIntent());
 					finish();
 				}
@@ -343,8 +347,8 @@ public class FileDialog extends ListActivity {
 	    if (m_bOneClickSelect) {
 	        return;
 	    }
-
-	    layoutCreate.setVisibility(View.GONE);
+	    
+		layoutCreate.setVisibility(View.GONE);
 		layoutSelect.setVisibility(View.VISIBLE);
 
 		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
