@@ -22,7 +22,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 public class FileDialog extends ListActivity {
-
     // @see https://code.google.com/p/android-file-dialog/issues/detail?id=3
     // @see http://twigstechtips.blogspot.com.au/2011/11/for-my-app-moustachify-everything-i-was.html
     // This is purely a data storage class for saving information between rotations
@@ -33,19 +32,21 @@ public class FileDialog extends ListActivity {
             this.m_strCurrentPath = currentPath;
         }
     }
-
+    
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
 	private static final String ROOT = "/";
 
 	// This is used to configure the initial folder when it opens.
 	public static final String START_PATH = "START_PATH";
-	// Used to retrieve the path of the result file.
+	// Used to retrieve the absolute filename of the result file.
 	public static final String RESULT_PATH = "RESULT_PATH";
 	// Set to SelectionMode.MODE_OPEN to disable the "New" button.
 	public static final String SELECTION_MODE = "SELECTION_MODE";
 	// Set to hide the "myPath" TextView.
 	public static final String OPTION_CURRENT_PATH_IN_TITLEBAR = "OPTION_CURRENT_PATH_IN_TITLEBAR";
+	// Option for one-click select
+	public static final String OPTION_ONE_CLICK_SELECT = "OPTION_ONE_CLICK_SELECT";
 
 	private List<String> path = null;
 	private TextView myPath;
@@ -64,6 +65,9 @@ public class FileDialog extends ListActivity {
 	
 	// True if the titlebar is to show the current folder. This will also hide the "myPath" view.
 	private boolean m_bTitlebarFolder = false;
+	
+	// True if one click select mode is enabled.
+	private boolean m_bOneClickSelect = false;
 
 	private File selectedFile;
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
@@ -80,16 +84,17 @@ public class FileDialog extends ListActivity {
 		myPath = (TextView) findViewById(R.id.path);
 		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
 
-		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
-
 		// Hide the titlebar if needed
 		m_bTitlebarFolder = getIntent().getBooleanExtra(OPTION_CURRENT_PATH_IN_TITLEBAR, m_bTitlebarFolder);
 
 		if (m_bTitlebarFolder) {
 		    myPath.setVisibility(View.GONE);
 		}
-
+		
+		// One click select
+		m_bOneClickSelect = getIntent().getBooleanExtra(OPTION_ONE_CLICK_SELECT, m_bOneClickSelect);
+		
+		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
 		selectButton = (Button) findViewById(R.id.fdButtonSelect);
 		selectButton.setEnabled(false);
@@ -127,6 +132,13 @@ public class FileDialog extends ListActivity {
 		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
 		layoutCreate.setVisibility(View.GONE);
 
+
+		// If the New button is disabled and it's one click select, hide the selection layout.
+		if (selectionMode == SelectionMode.MODE_OPEN && m_bOneClickSelect) {
+		    layoutSelect.setVisibility(View.GONE);
+		}
+
+
 		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
 		cancelButton.setOnClickListener(new OnClickListener() {
 
@@ -142,8 +154,7 @@ public class FileDialog extends ListActivity {
 			@Override
 			public void onClick(View v) {
 				if (mFileName.getText().length() > 0) {
-					getIntent().putExtra(RESULT_PATH,
-							currentPath + "/" + mFileName.getText());
+					getIntent().putExtra(RESULT_PATH, currentPath + "/" + mFileName.getText());
 					setResult(RESULT_OK, getIntent());
 					finish();
 				}
@@ -286,10 +297,15 @@ public class FileDialog extends ListActivity {
 									}
 								}).show();
 			}
-		} else {
+		}
+		else {
 			selectedFile = file;
 			v.setSelected(true);
 			selectButton.setEnabled(true);
+			
+			if (m_bOneClickSelect) {
+			    selectButton.performClick();
+			}
 		}
 	}
 
@@ -324,13 +340,17 @@ public class FileDialog extends ListActivity {
 	}
 
 	private void setSelectVisible(View v) {
-		layoutCreate.setVisibility(View.GONE);
+	    if (m_bOneClickSelect) {
+	        return;
+	    }
+
+	    layoutCreate.setVisibility(View.GONE);
 		layoutSelect.setVisibility(View.VISIBLE);
 
 		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		selectButton.setEnabled(false);
 	}
-
+	
 	// Remember the information when the screen is just about to be rotated.
 	// This information can be retrieved by using getLastNonConfigurationInstance()
 	public Object onRetainNonConfigurationInstance() {
