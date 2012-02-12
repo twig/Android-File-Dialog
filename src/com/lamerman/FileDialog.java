@@ -35,20 +35,10 @@ public class FileDialog extends ListActivity {
     
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
-	private static final String ROOT = "/";
+	public static final String ROOT = "/";
 
-	// This is used to configure the initial folder when it opens.
-	public static final String START_PATH = "START_PATH";
-	// Used to retrieve the absolute filename of the result file.
-	public static final String RESULT_PATH = "RESULT_PATH";
-	// Used to retrieve the full folder of the result file.
-	public static final String RESULT_FOLDER = "RESULT_FOLDER";
-	// Set to SelectionMode.MODE_OPEN to disable the "New" button.
-	public static final String SELECTION_MODE = "SELECTION_MODE";
-	// Set to hide the "myPath" TextView.
-	public static final String OPTION_CURRENT_PATH_IN_TITLEBAR = "OPTION_CURRENT_PATH_IN_TITLEBAR";
-	// Option for one-click select
-	public static final String OPTION_ONE_CLICK_SELECT = "OPTION_ONE_CLICK_SELECT";
+	private FileDialogOptions options;
+	
 
 	private List<String> path = null;
 	private TextView myPath;
@@ -62,14 +52,6 @@ public class FileDialog extends ListActivity {
 	private InputMethodManager inputManager;
 	private String parentPath;
 	private String currentPath = ROOT;
-
-	private int selectionMode = SelectionMode.MODE_CREATE;
-	
-	// True if the titlebar is to show the current folder. This will also hide the "myPath" view.
-	private boolean m_bTitlebarFolder = false;
-	
-	// True if one click select mode is enabled.
-	private boolean m_bOneClickSelect = false;
 
 	private File selectedFile;
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
@@ -86,36 +68,29 @@ public class FileDialog extends ListActivity {
 		myPath = (TextView) findViewById(R.id.path);
 		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
 
+		// Read options
+		options = new FileDialogOptions(getIntent());
+		
 		// Hide the titlebar if needed
-		m_bTitlebarFolder = getIntent().getBooleanExtra(OPTION_CURRENT_PATH_IN_TITLEBAR, m_bTitlebarFolder);
-
-		if (m_bTitlebarFolder) {
+		if (options.titlebarForCurrentPath) {
 		    myPath.setVisibility(View.GONE);
 		}
-		
-		// One click select
-		m_bOneClickSelect = getIntent().getBooleanExtra(OPTION_ONE_CLICK_SELECT, m_bOneClickSelect);
 		
 		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
 		selectButton = (Button) findViewById(R.id.fdButtonSelect);
 		selectButton.setEnabled(false);
 		selectButton.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				if (selectedFile != null) {
-					getIntent().putExtra(RESULT_PATH, selectedFile.getPath());
-					getIntent().putExtra(RESULT_FOLDER, currentPath);
-					setResult(RESULT_OK, getIntent());
-					finish();
+				    returnFilename(selectedFile.getPath());
 				}
 			}
 		});
 
 		final Button newButton = (Button) findViewById(R.id.fdButtonNew);
 		newButton.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				setCreateVisible(v);
@@ -125,9 +100,7 @@ public class FileDialog extends ListActivity {
 			}
 		});
 
-		selectionMode = getIntent().getIntExtra(SELECTION_MODE,
-				SelectionMode.MODE_CREATE);
-		if (selectionMode == SelectionMode.MODE_OPEN) {
+		if (!options.allowCreate) {
 			newButton.setEnabled(false);
 		}
 
@@ -137,7 +110,7 @@ public class FileDialog extends ListActivity {
 
 
 		// If the New button is disabled and it's one click select, hide the selection layout.
-		if (selectionMode == SelectionMode.MODE_OPEN && m_bOneClickSelect) {
+		if (!options.allowCreate && options.oneClickSelect) {
 		    layoutSelect.setVisibility(View.GONE);
 		}
 
@@ -153,14 +126,16 @@ public class FileDialog extends ListActivity {
 		});
 		final Button createButton = (Button) findViewById(R.id.fdButtonCreate);
 		createButton.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				if (mFileName.getText().length() > 0) {
-					getIntent().putExtra(RESULT_PATH, currentPath + "/" + mFileName.getText());
-					getIntent().putExtra(RESULT_FOLDER, currentPath);
-					setResult(RESULT_OK, getIntent());
-					finish();
+				    StringBuilder sb = new StringBuilder();
+				    
+				    sb.append(currentPath);
+				    sb.append("/");
+				    sb.append(mFileName.getText());
+				    
+				    returnFilename(sb.toString());
 				}
 			}
 		});
@@ -173,8 +148,7 @@ public class FileDialog extends ListActivity {
 		}
 		// New instance of FileDialog
 		else {
-		    String startPath = getIntent().getStringExtra(START_PATH);
-		    getDir(startPath != null ? startPath : ROOT);
+		    getDir(options.currentPath);
 		}
 	}
 
@@ -208,7 +182,7 @@ public class FileDialog extends ListActivity {
 			files = f.listFiles();
 		}
 
-		if (m_bTitlebarFolder) {
+		if (options.titlebarForCurrentPath) {
 		    this.setTitle(currentPath);
 		}
 		else {
@@ -307,7 +281,7 @@ public class FileDialog extends ListActivity {
 			v.setSelected(true);
 			selectButton.setEnabled(true);
 			
-			if (m_bOneClickSelect) {
+			if (options.oneClickSelect) {
 			    selectButton.performClick();
 			}
 		}
@@ -344,7 +318,7 @@ public class FileDialog extends ListActivity {
 	}
 
 	private void setSelectVisible(View v) {
-	    if (m_bOneClickSelect) {
+	    if (options.oneClickSelect) {
 	        return;
 	    }
 	    
@@ -353,6 +327,15 @@ public class FileDialog extends ListActivity {
 
 		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		selectButton.setEnabled(false);
+	}
+	
+	
+	private void returnFilename(String filepath) {
+	    this.options.currentPath = currentPath;
+	    this.options.selectedFile = filepath;
+
+	    setResult(RESULT_OK, options.createResultIntent());
+	    finish();
 	}
 	
 	// Remember the information when the screen is just about to be rotated.
