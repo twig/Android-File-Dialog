@@ -148,7 +148,14 @@ public class FileDialog extends ListActivity {
 		}
 		// New instance of FileDialog
 		else {
-		    getDir(options.currentPath);
+		    File file = new File(options.currentPath);
+		    
+		    if (file.isDirectory() && file.exists()) {
+		        getDir(options.currentPath);
+		    }
+		    else {
+		        getDir(ROOT);
+		    }
 		}
 	}
 
