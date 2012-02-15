@@ -21,6 +21,13 @@ public class FileDialogOptions {
     public boolean titlebarForCurrentPath;
     // Option for one-click select
     public boolean oneClickSelect;
+    
+    // Option for file icon.
+    public int iconFile = R.drawable.document;
+    // Option for folder icon.
+    public int iconFolder = R.drawable.folder_horizontal;
+    // Option for up/root icon.
+    public int iconUp = R.drawable.shortcut_overlay;
 
 
 
@@ -34,6 +41,12 @@ public class FileDialogOptions {
     public static final String OPTION_CURRENT_PATH_IN_TITLEBAR = "OPTION_CURRENT_PATH_IN_TITLEBAR";
     // Option for one-click select
     public static final String OPTION_ONE_CLICK_SELECT = "OPTION_ONE_CLICK_SELECT";
+    // Option for file icon.
+    public static final String OPTION_ICON_FILE = "OPTION_ICON_FILE";
+    // Option for folder icon.
+    public static final String OPTION_ICON_FOLDER = "OPTION_ICON_FOLDER";
+    // Option for up icon.
+    public static final String OPTION_ICON_UP = "OPTION_ICON_UP";
 
     
 //  // Used to retrieve the absolute filename of the result file.
@@ -76,6 +89,11 @@ public class FileDialogOptions {
         
         // One click select
         this.oneClickSelect = intent.getBooleanExtra(OPTION_ONE_CLICK_SELECT, this.oneClickSelect);
+        
+        // Icons
+        this.iconFile = intent.getIntExtra(OPTION_ICON_FILE, this.iconFile);
+        this.iconFolder = intent.getIntExtra(OPTION_ICON_FOLDER, this.iconFolder);
+        this.iconUp = intent.getIntExtra(OPTION_ICON_UP, this.iconUp);
     }
 
     /**
@@ -91,6 +109,9 @@ public class FileDialogOptions {
         intent.putExtra(OPTION_ALLOW_CREATE, this.allowCreate);
         intent.putExtra(OPTION_CURRENT_PATH_IN_TITLEBAR, this.titlebarForCurrentPath);
         intent.putExtra(OPTION_ONE_CLICK_SELECT, this.oneClickSelect);
+        intent.putExtra(OPTION_ICON_FILE, this.iconFile);
+        intent.putExtra(OPTION_ICON_FOLDER, this.iconFolder);
+        intent.putExtra(OPTION_ICON_UP, this.iconUp);
         
         return intent;
     }

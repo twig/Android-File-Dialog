@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="fill_parent" android:layout_height="fill_parent" android:padding="3sp">
-
-	<ImageView android:layout_alignParentLeft="true" android:id="@+id/fdrowimage"
-		android:layout_height="35dp" android:layout_width="wrap_content"
-		android:paddingBottom="3sp" android:paddingTop="3sp" android:paddingRight="5sp" android:paddingLeft="3sp"></ImageView>
-	<TextView android:text="@+id/fdrowtext" android:id="@+id/fdrowtext" android:layout_toRightOf="@+id/fdrowimage"
-		android:layout_alignTop="@+id/fdrowimage" android:layout_alignBottom="@+id/fdrowimage"
-		android:gravity="center_vertical" android:layout_height="35dp"
-		android:textSize="23dp" android:layout_width="fill_parent"></TextView> 
-
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="fill_parent" android:layout_height="fill_parent" android:padding="3sp">
+	<ImageView android:layout_alignParentLeft="true" android:id="@+id/fdrowimage" android:layout_width="wrap_content" android:paddingBottom="3sp" android:paddingTop="3sp" android:paddingRight="5sp" android:paddingLeft="3sp" android:layout_height="35dp"></ImageView>
+	<TextView android:id="@+id/fdrowtext" android:layout_toRightOf="@+id/fdrowimage" android:layout_alignTop="@+id/fdrowimage" android:layout_alignBottom="@+id/fdrowimage" android:gravity="center_vertical" android:text="This is some ridiculously long filename that will likely get trimmed" android:textSize="20dp" android:singleLine="true" android:layout_width="fill_parent" android:layout_height="wrap_content"></TextView>
 </RelativeLayout>
