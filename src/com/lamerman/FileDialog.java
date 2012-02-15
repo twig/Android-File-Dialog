@@ -199,11 +199,11 @@ public class FileDialog extends ListActivity {
 		if (!currentPath.equals(ROOT)) {
 
 			item.add(ROOT);
-			addItem(ROOT, R.drawable.folder);
+			addItem(ROOT, this.options.iconUp);
 			path.add(ROOT);
 
 			item.add("../");
-			addItem("../", R.drawable.folder);
+			addItem("../", this.options.iconUp);
 			path.add(f.getParent());
 			parentPath = f.getParent();
 
@@ -234,11 +234,11 @@ public class FileDialog extends ListActivity {
 						R.id.fdrowtext, R.id.fdrowimage });
 
 		for (String dir : dirsMap.tailMap("").values()) {
-			addItem(dir, R.drawable.folder);
+			addItem(dir, this.options.iconFolder);
 		}
 
 		for (String file : filesMap.tailMap("").values()) {
-			addItem(file, R.drawable.file);
+			addItem(file, this.options.iconFile);
 		}
 
 		fileList.notifyDataSetChanged();
