@@ -28,6 +28,8 @@ public class FileDialogOptions {
     public int iconFolder = R.drawable.folder_horizontal;
     // Option for up/root icon.
     public int iconUp = R.drawable.shortcut_overlay;
+    // Option for SDCard icon
+    public int iconSDCard = R.drawable.floppy;
 
 
 

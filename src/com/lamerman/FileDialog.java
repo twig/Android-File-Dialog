@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -36,6 +37,7 @@ public class FileDialog extends ListActivity {
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
 	public static final String ROOT = "/";
+	public static final String PATH_SDCARD = Environment.getExternalStorageDirectory().getAbsolutePath();
 
 	private FileDialogOptions options;
 	
@@ -75,7 +77,7 @@ public class FileDialog extends ListActivity {
 		if (options.titlebarForCurrentPath) {
 		    myPath.setVisibility(View.GONE);
 		}
-		
+
 		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
 
 		selectButton = (Button) findViewById(R.id.fdButtonSelect);
@@ -196,8 +198,22 @@ public class FileDialog extends ListActivity {
 		    myPath.setText(getText(R.string.location) + ": " + currentPath);
 		}
 
+		/*
+         * http://stackoverflow.com/questions/5090915/show-songs-from-sdcard
+         * http://developer.android.com/reference/android/os/Environment.html
+         * http://stackoverflow.com/questions/5453708/android-how-to-use-environment-getexternalstoragedirectory
+         */
+        if (currentPath.equals(ROOT)) {
+            boolean mounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
+            
+            if (mounted) {
+                item.add(PATH_SDCARD);
+                addItem(PATH_SDCARD, this.options.iconSDCard);
+                path.add(PATH_SDCARD);
+            }
+        }
+		
 		if (!currentPath.equals(ROOT)) {
-
 			item.add(ROOT);
 			addItem(ROOT, this.options.iconUp);
 			path.add(ROOT);
@@ -206,9 +222,8 @@ public class FileDialog extends ListActivity {
 			addItem("../", this.options.iconUp);
 			path.add(f.getParent());
 			parentPath = f.getParent();
-
 		}
-
+		
 		TreeMap<String, String> dirsMap = new TreeMap<String, String>();
 		TreeMap<String, String> dirsPathMap = new TreeMap<String, String>();
 		TreeMap<String, String> filesMap = new TreeMap<String, String>();
@@ -256,11 +271,24 @@ public class FileDialog extends ListActivity {
 
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
-
 		File file = new File(path.get(position));
 
 		setSelectVisible(v);
 
+		if (!file.exists()) {
+		    new AlertDialog.Builder(this)
+                .setIcon(R.drawable.icon)
+                .setTitle("Does not exist.")
+                .setMessage(file.getName())
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                })
+                .show();
+		    return;
+		}
+		
 		if (file.isDirectory()) {
 			selectButton.setEnabled(false);
 			if (file.canRead()) {
