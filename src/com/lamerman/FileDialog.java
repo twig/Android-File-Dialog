@@ -42,11 +42,10 @@ public class FileDialog extends ListActivity {
 
 	private FileDialogOptions options;
 	
-
+	// TODO: This needs a cleanup
 	private List<String> path = null;
 	private TextView myPath;
 	private EditText mFileName;
-	private ArrayList<HashMap<String, Object>> mList;
 
 	private Button selectButton;
 
@@ -177,12 +176,11 @@ public class FileDialog extends ListActivity {
 	}
 
 	private void getDirImpl(final String dirPath) {
-
 		currentPath = dirPath;
 
 		final List<String> item = new ArrayList<String>();
 		path = new ArrayList<String>();
-		mList = new ArrayList<HashMap<String, Object>>();
+		ArrayList<HashMap<String, Object>> mList = new ArrayList<HashMap<String, Object>>();
 
 		File f = new File(currentPath);
 		File[] files = f.listFiles();
@@ -209,18 +207,18 @@ public class FileDialog extends ListActivity {
             
             if (mounted) {
                 item.add(PATH_SDCARD);
-                addItem(PATH_SDCARD, this.options.iconSDCard);
+                addItem(mList, PATH_SDCARD, this.options.iconSDCard);
                 path.add(PATH_SDCARD);
             }
         }
 		
 		if (!currentPath.equals(PATH_ROOT)) {
 			item.add(PATH_ROOT);
-			addItem(PATH_ROOT, this.options.iconUp);
+			addItem(mList, PATH_ROOT, this.options.iconUp);
 			path.add(PATH_ROOT);
 
 			item.add("../");
-			addItem("../", this.options.iconUp);
+			addItem(mList, "../", this.options.iconUp);
 			path.add(f.getParent());
 			parentPath = f.getParent();
 		}
@@ -239,31 +237,32 @@ public class FileDialog extends ListActivity {
 				filesPathMap.put(file.getName(), file.getPath());
 			}
 		}
+		
 		item.addAll(dirsMap.tailMap("").values());
 		item.addAll(filesMap.tailMap("").values());
 		path.addAll(dirsPathMap.tailMap("").values());
 		path.addAll(filesPathMap.tailMap("").values());
 
 		SimpleAdapter fileList = new SimpleAdapter(this, mList,
-				R.layout.file_dialog_row,
-				new String[] { ITEM_KEY, ITEM_IMAGE }, new int[] {
-						R.id.fdrowtext, R.id.fdrowimage });
+			R.layout.file_dialog_row,
+			new String[] { ITEM_KEY, ITEM_IMAGE },
+			new int[] { R.id.fdrowtext, R.id.fdrowimage }
+		);
 
 		for (String dir : dirsMap.tailMap("").values()) {
-			addItem(dir, this.options.iconFolder);
+			addItem(mList, dir, this.options.iconFolder);
 		}
 
 		for (String file : filesMap.tailMap("").values()) {
-			addItem(file, this.options.iconFile);
+			addItem(mList, file, this.options.iconFile);
 		}
 
 		fileList.notifyDataSetChanged();
 
 		setListAdapter(fileList);
-
 	}
 
-	private void addItem(String fileName, int imageId) {
+	private void addItem(ArrayList<HashMap<String, Object>> mList, String fileName, int imageId) {
 		HashMap<String, Object> item = new HashMap<String, Object>();
 		item.put(ITEM_KEY, fileName);
 		item.put(ITEM_IMAGE, imageId);
