@@ -178,7 +178,6 @@ public class FileDialog extends ListActivity {
 	private void getDirImpl(final String dirPath) {
 		currentPath = dirPath;
 
-		final List<String> item = new ArrayList<String>();
 		path = new ArrayList<String>();
 		ArrayList<HashMap<String, Object>> mList = new ArrayList<HashMap<String, Object>>();
 
@@ -206,18 +205,15 @@ public class FileDialog extends ListActivity {
             boolean mounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
             
             if (mounted) {
-                item.add(PATH_SDCARD);
                 addItem(mList, PATH_SDCARD, this.options.iconSDCard);
                 path.add(PATH_SDCARD);
             }
         }
 		
 		if (!currentPath.equals(PATH_ROOT)) {
-			item.add(PATH_ROOT);
 			addItem(mList, PATH_ROOT, this.options.iconUp);
 			path.add(PATH_ROOT);
 
-			item.add("../");
 			addItem(mList, "../", this.options.iconUp);
 			path.add(f.getParent());
 			parentPath = f.getParent();
@@ -238,8 +234,6 @@ public class FileDialog extends ListActivity {
 			}
 		}
 		
-		item.addAll(dirsMap.tailMap("").values());
-		item.addAll(filesMap.tailMap("").values());
 		path.addAll(dirsPathMap.tailMap("").values());
 		path.addAll(filesPathMap.tailMap("").values());
 
