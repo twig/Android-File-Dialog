@@ -2,6 +2,7 @@ package com.lamerman;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -183,11 +184,16 @@ public class FileDialog extends ListActivity {
 
 		File f = new File(currentPath);
 		File[] files = f.listFiles();
+		
+		// Null if file is not a directory
 		if (files == null) {
 			currentPath = PATH_ROOT;
 			f = new File(currentPath);
 			files = f.listFiles();
 		}
+		
+		// Sort files by alphabet and ignore casing
+		Arrays.sort(files);
 
 		if (options.titlebarForCurrentPath) {
 		    this.setTitle(currentPath);
@@ -223,6 +229,7 @@ public class FileDialog extends ListActivity {
 		TreeMap<String, String> dirsPathMap = new TreeMap<String, String>();
 		TreeMap<String, String> filesMap = new TreeMap<String, String>();
 		TreeMap<String, String> filesPathMap = new TreeMap<String, String>();
+
 		for (File file : files) {
 			if (file.isDirectory()) {
 				String dirName = file.getName();
@@ -237,12 +244,6 @@ public class FileDialog extends ListActivity {
 		path.addAll(dirsPathMap.tailMap("").values());
 		path.addAll(filesPathMap.tailMap("").values());
 
-		SimpleAdapter fileList = new SimpleAdapter(this, mList,
-			R.layout.file_dialog_row,
-			new String[] { ITEM_KEY, ITEM_IMAGE },
-			new int[] { R.id.fdrowtext, R.id.fdrowimage }
-		);
-
 		for (String dir : dirsMap.tailMap("").values()) {
 			addItem(mList, dir, this.options.iconFolder);
 		}
@@ -251,6 +252,12 @@ public class FileDialog extends ListActivity {
 			addItem(mList, file, this.options.iconFile);
 		}
 
+		SimpleAdapter fileList = new SimpleAdapter(this, mList,
+            R.layout.file_dialog_row,
+            new String[] { ITEM_KEY, ITEM_IMAGE },
+            new int[] { R.id.fdrowtext, R.id.fdrowimage }
+        );
+      
 		fileList.notifyDataSetChanged();
 
 		setListAdapter(fileList);
