@@ -36,7 +36,8 @@ public class FileDialog extends ListActivity {
     
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
-	public static final String ROOT = "/";
+	
+	public static final String PATH_ROOT = "/";
 	public static final String PATH_SDCARD = Environment.getExternalStorageDirectory().getAbsolutePath();
 
 	private FileDialogOptions options;
@@ -53,7 +54,7 @@ public class FileDialog extends ListActivity {
 	private LinearLayout layoutCreate;
 	private InputMethodManager inputManager;
 	private String parentPath;
-	private String currentPath = ROOT;
+	private String currentPath = PATH_ROOT;
 
 	private File selectedFile;
 	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
@@ -134,7 +135,7 @@ public class FileDialog extends ListActivity {
 				    StringBuilder sb = new StringBuilder();
 				    
 				    sb.append(currentPath);
-				    sb.append("/");
+				    sb.append(File.separator);
 				    sb.append(mFileName.getText());
 				    
 				    returnFilename(sb.toString());
@@ -156,7 +157,7 @@ public class FileDialog extends ListActivity {
 		        getDir(options.currentPath);
 		    }
 		    else {
-		        getDir(ROOT);
+		        getDir(PATH_ROOT);
 		    }
 		}
 	}
@@ -186,7 +187,7 @@ public class FileDialog extends ListActivity {
 		File f = new File(currentPath);
 		File[] files = f.listFiles();
 		if (files == null) {
-			currentPath = ROOT;
+			currentPath = PATH_ROOT;
 			f = new File(currentPath);
 			files = f.listFiles();
 		}
@@ -203,7 +204,7 @@ public class FileDialog extends ListActivity {
          * http://developer.android.com/reference/android/os/Environment.html
          * http://stackoverflow.com/questions/5453708/android-how-to-use-environment-getexternalstoragedirectory
          */
-        if (currentPath.equals(ROOT)) {
+        if (currentPath.equals(PATH_ROOT)) {
             boolean mounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
             
             if (mounted) {
@@ -213,10 +214,10 @@ public class FileDialog extends ListActivity {
             }
         }
 		
-		if (!currentPath.equals(ROOT)) {
-			item.add(ROOT);
-			addItem(ROOT, this.options.iconUp);
-			path.add(ROOT);
+		if (!currentPath.equals(PATH_ROOT)) {
+			item.add(PATH_ROOT);
+			addItem(PATH_ROOT, this.options.iconUp);
+			path.add(PATH_ROOT);
 
 			item.add("../");
 			addItem("../", this.options.iconUp);
@@ -331,7 +332,7 @@ public class FileDialog extends ListActivity {
 				layoutCreate.setVisibility(View.GONE);
 				layoutSelect.setVisibility(View.VISIBLE);
 			} else {
-				if (!currentPath.equals(ROOT)) {
+				if (!currentPath.equals(PATH_ROOT)) {
 					getDir(parentPath);
 				} else {
 					return super.onKeyDown(keyCode, event);

@@ -11,7 +11,7 @@ public class FileDialogOptions {
 
     
     // This is used to configure the start folder when it opens and the folder of the result file.
-    public String currentPath = FileDialog.ROOT;
+    public String currentPath = FileDialog.PATH_ROOT;
     // Used to retrieve the absolute filename of the result file.
     public String selectedFile = null;
     
