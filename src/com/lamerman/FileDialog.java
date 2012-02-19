@@ -286,7 +286,8 @@ public class FileDialog extends ListActivity {
 		if (file.isDirectory()) {
 			selectButton.setEnabled(false);
 			if (file.canRead()) {
-				lastPositions.put(currentPath, position);
+			    // Save the scroll position so users don't get confused when they come back
+				lastPositions.put(currentPath, this.getListView().getFirstVisiblePosition());
 				getDir(path.get(position));
 			} else {
 				new AlertDialog.Builder(this)
