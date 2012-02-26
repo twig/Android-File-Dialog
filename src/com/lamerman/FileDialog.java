@@ -211,16 +211,16 @@ public class FileDialog extends ListActivity {
             boolean mounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
             
             if (mounted) {
-                addItem(mList, PATH_SDCARD, this.options.iconSDCard);
+                addItem(mList, PATH_SDCARD + "(SD Card)", this.options.iconSDCard);
                 path.add(PATH_SDCARD);
             }
         }
 		
 		if (!currentPath.equals(PATH_ROOT)) {
-			addItem(mList, PATH_ROOT, this.options.iconUp);
+			addItem(mList, "/ (Root folder)", this.options.iconUp);
 			path.add(PATH_ROOT);
 
-			addItem(mList, "../", this.options.iconUp);
+			addItem(mList, "../ (Parent folder)", this.options.iconUp);
 			path.add(f.getParent());
 			parentPath = f.getParent();
 		}
