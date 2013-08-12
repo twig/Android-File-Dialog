@@ -3,9 +3,9 @@ package com.lamerman;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.TreeMap;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -34,15 +34,15 @@ public class FileDialog extends ListActivity {
             this.m_strCurrentPath = currentPath;
         }
     }
-    
+
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
-	
+
 	public static final String PATH_ROOT = "/";
 	public static final String PATH_SDCARD = Environment.getExternalStorageDirectory().getAbsolutePath();
 
 	private FileDialogOptions options;
-	
+
 	// TODO: This needs a cleanup
 	private List<String> path = null;
 	private TextView myPath;
@@ -57,7 +57,7 @@ public class FileDialog extends ListActivity {
 	private String currentPath = PATH_ROOT;
 
 	private File selectedFile;
-	private HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
+	private final HashMap<String, Integer> lastPositions = new HashMap<String, Integer>();
 
 	/**
 	 * Called when the activity is first created.
@@ -73,7 +73,7 @@ public class FileDialog extends ListActivity {
 
 		// Read options
 		options = new FileDialogOptions(getIntent());
-		
+
 		// Hide the titlebar if needed
 		if (options.titlebarForCurrentPath) {
 		    myPath.setVisibility(View.GONE);
@@ -133,11 +133,11 @@ public class FileDialog extends ListActivity {
 			public void onClick(View v) {
 				if (mFileName.getText().length() > 0) {
 				    StringBuilder sb = new StringBuilder();
-				    
+
 				    sb.append(currentPath);
 				    sb.append(File.separator);
 				    sb.append(mFileName.getText());
-				    
+
 				    returnFilename(sb.toString());
 				}
 			}
@@ -152,7 +152,7 @@ public class FileDialog extends ListActivity {
 		// New instance of FileDialog
 		else {
 		    File file = new File(options.currentPath);
-		    
+
 		    if (file.isDirectory() && file.exists()) {
 		        getDir(options.currentPath);
 		    }
@@ -184,16 +184,21 @@ public class FileDialog extends ListActivity {
 
 		File f = new File(currentPath);
 		File[] files = f.listFiles();
-		
+
 		// Null if file is not a directory
 		if (files == null) {
 			currentPath = PATH_ROOT;
 			f = new File(currentPath);
 			files = f.listFiles();
 		}
-		
+
 		// Sort files by alphabet and ignore casing
-		Arrays.sort(files);
+		Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File lhs, File rhs) {
+                return lhs.getPath().compareToIgnoreCase(rhs.getPath());
+            }
+		});
 
 		if (options.titlebarForCurrentPath) {
 		    this.setTitle(currentPath);
@@ -209,13 +214,13 @@ public class FileDialog extends ListActivity {
          */
         if (currentPath.equals(PATH_ROOT)) {
             boolean mounted = Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
-            
+
             if (mounted) {
                 addItem(mList, PATH_SDCARD + "(SD Card)", this.options.iconSDCard);
                 path.add(PATH_SDCARD);
             }
         }
-		
+
 		if (!currentPath.equals(PATH_ROOT)) {
 			addItem(mList, "/ (Root folder)", this.options.iconUp);
 			path.add(PATH_ROOT);
@@ -224,32 +229,27 @@ public class FileDialog extends ListActivity {
 			path.add(f.getParent());
 			parentPath = f.getParent();
 		}
-		
-		TreeMap<String, String> dirsMap = new TreeMap<String, String>();
-		TreeMap<String, String> dirsPathMap = new TreeMap<String, String>();
-		TreeMap<String, String> filesMap = new TreeMap<String, String>();
-		TreeMap<String, String> filesPathMap = new TreeMap<String, String>();
+
+		ArrayList<File> listDirs = new ArrayList<File>();
+		ArrayList<File> listFiles = new ArrayList<File>();
 
 		for (File file : files) {
 			if (file.isDirectory()) {
-				String dirName = file.getName();
-				dirsMap.put(dirName, dirName);
-				dirsPathMap.put(dirName, file.getPath());
-			} else {
-				filesMap.put(file.getName(), file.getName());
-				filesPathMap.put(file.getName(), file.getPath());
+				listDirs.add(file);
+			}
+			else {
+			    listFiles.add(file);
 			}
 		}
-		
-		path.addAll(dirsPathMap.tailMap("").values());
-		path.addAll(filesPathMap.tailMap("").values());
 
-		for (String dir : dirsMap.tailMap("").values()) {
-			addItem(mList, dir, this.options.iconFolder);
+		for (File dir : listDirs) {
+		    path.add(dir.getPath());
+			addItem(mList, dir.getName(), this.options.iconFolder);
 		}
 
-		for (String file : filesMap.tailMap("").values()) {
-			addItem(mList, file, this.options.iconFile);
+		for (File file : listFiles) {
+		    path.add(file.getPath());
+			addItem(mList, file.getName(), this.options.iconFile);
 		}
 
 		SimpleAdapter fileList = new SimpleAdapter(this, mList,
@@ -257,7 +257,7 @@ public class FileDialog extends ListActivity {
             new String[] { ITEM_KEY, ITEM_IMAGE },
             new int[] { R.id.fdrowtext, R.id.fdrowimage }
         );
-      
+
 		fileList.notifyDataSetChanged();
 
 		setListAdapter(fileList);
@@ -289,7 +289,7 @@ public class FileDialog extends ListActivity {
                 .show();
 		    return;
 		}
-		
+
 		if (file.isDirectory()) {
 			selectButton.setEnabled(false);
 			if (file.canRead()) {
@@ -317,7 +317,7 @@ public class FileDialog extends ListActivity {
 			selectedFile = file;
 			v.setSelected(true);
 			selectButton.setEnabled(true);
-			
+
 			if (options.oneClickSelect) {
 			    selectButton.performClick();
 			}
@@ -358,15 +358,15 @@ public class FileDialog extends ListActivity {
 	    if (options.oneClickSelect) {
 	        return;
 	    }
-	    
+
 		layoutCreate.setVisibility(View.GONE);
 		layoutSelect.setVisibility(View.VISIBLE);
 
 		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
 		selectButton.setEnabled(false);
 	}
-	
-	
+
+
 	private void returnFilename(String filepath) {
 	    this.options.currentPath = currentPath;
 	    this.options.selectedFile = filepath;
@@ -374,10 +374,11 @@ public class FileDialog extends ListActivity {
 	    setResult(RESULT_OK, options.createResultIntent());
 	    finish();
 	}
-	
+
 	// Remember the information when the screen is just about to be rotated.
 	// This information can be retrieved by using getLastNonConfigurationInstance()
-	public Object onRetainNonConfigurationInstance() {
+	@Override
+    public Object onRetainNonConfigurationInstance() {
 	    return new LastConfiguration(this.currentPath);
 	}
 }
