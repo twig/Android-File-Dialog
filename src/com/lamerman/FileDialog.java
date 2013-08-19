@@ -7,15 +7,15 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
+import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -23,7 +23,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-public class FileDialog extends ListActivity {
+public class FileDialog extends Activity {
     // @see https://code.google.com/p/android-file-dialog/issues/detail?id=3
     // @see http://twigstechtips.blogspot.com.au/2011/11/for-my-app-moustachify-everything-i-was.html
     // This is purely a data storage class for saving information between rotations
@@ -44,7 +44,10 @@ public class FileDialog extends ListActivity {
 	private FileDialogOptions options;
 
 	// TODO: This needs a cleanup
-	private List<String> path = null;
+	private AlertDialog dialog;
+	private ListView listview;
+
+	private List<String> path;
 	private TextView myPath;
 	private EditText mFileName;
 
@@ -67,87 +70,106 @@ public class FileDialog extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setResult(RESULT_CANCELED, getIntent());
 
-		setContentView(R.layout.file_dialog_main);
-		myPath = (TextView) findViewById(R.id.path);
-		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
+
+
+
+		listview = new ListView(this);
+		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+			@Override
+			public void onItemClick(AdapterView<?> lv, View v, int pos, long id) {
+				handleListItemClick(v, pos, id);
+			}
+		});
+
 
 		// Read options
 		options = new FileDialogOptions(getIntent());
 
-		// Hide the titlebar if needed
-		if (options.titlebarForCurrentPath) {
-		    myPath.setVisibility(View.GONE);
-		}
 
-		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-
-		selectButton = (Button) findViewById(R.id.fdButtonSelect);
-		selectButton.setEnabled(false);
-		selectButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (selectedFile != null) {
-				    returnFilename(selectedFile.getPath());
-				}
-			}
-		});
-
-		final Button newButton = (Button) findViewById(R.id.fdButtonNew);
-		newButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				setCreateVisible(v);
-
-				mFileName.setText("");
-				mFileName.requestFocus();
-			}
-		});
-
-		if (!options.allowCreate) {
-			newButton.setEnabled(false);
-		}
-
-		layoutSelect = (LinearLayout) findViewById(R.id.fdLinearLayoutSelect);
-		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
-		layoutCreate.setVisibility(View.GONE);
+		dialog = new AlertDialog.Builder(this)
+			.setTitle("Select file")
+			.setView(listview)
+			.setPositiveButton(android.R.string.ok, null)
+			.setNegativeButton(android.R.string.cancel, null)
+			.create();
 
 
-		// If the New button is disabled and it's one click select, hide the selection layout.
-		if (!options.allowCreate && options.oneClickSelect) {
-		    layoutSelect.setVisibility(View.GONE);
-		}
 
+//		setContentView(R.layout.file_dialog_main);
+//
+//		myPath = (TextView) findViewById(R.id.path);
+//		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
 
-		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
-		cancelButton.setOnClickListener(new OnClickListener() {
-
-			@Override
-			public void onClick(View v) {
-				setSelectVisible(v);
-			}
-
-		});
-		final Button createButton = (Button) findViewById(R.id.fdButtonCreate);
-		createButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				if (mFileName.getText().length() > 0) {
-				    StringBuilder sb = new StringBuilder();
-
-				    sb.append(currentPath);
-				    sb.append(File.separator);
-				    sb.append(mFileName.getText());
-
-				    returnFilename(sb.toString());
-				}
-			}
-		});
+//		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
+//
+//		selectButton = (Button) findViewById(R.id.fdButtonSelect);
+//		selectButton.setEnabled(false);
+//		selectButton.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				if (selectedFile != null) {
+//				    returnFilename(selectedFile.getPath());
+//				}
+//			}
+//		});
+//
+//		final Button newButton = (Button) findViewById(R.id.fdButtonNew);
+//		newButton.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				setCreateVisible(v);
+//
+//				mFileName.setText("");
+//				mFileName.requestFocus();
+//			}
+//		});
+//
+//		if (!options.allowCreate) {
+//			newButton.setEnabled(false);
+//		}
+//
+//		layoutSelect = (LinearLayout) findViewById(R.id.fdLinearLayoutSelect);
+//		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
+//		layoutCreate.setVisibility(View.GONE);
+//
+//
+//		// If the New button is disabled and it's one click select, hide the selection layout.
+//		if (!options.allowCreate && options.oneClickSelect) {
+//		    layoutSelect.setVisibility(View.GONE);
+//		}
+//
+//
+//		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
+//		cancelButton.setOnClickListener(new OnClickListener() {
+//
+//			@Override
+//			public void onClick(View v) {
+//				setSelectVisible(v);
+//			}
+//
+//		});
+//		final Button createButton = (Button) findViewById(R.id.fdButtonCreate);
+//		createButton.setOnClickListener(new OnClickListener() {
+//			@Override
+//			public void onClick(View v) {
+//				if (mFileName.getText().length() > 0) {
+//				    StringBuilder sb = new StringBuilder();
+//
+//				    sb.append(currentPath);
+//				    sb.append(File.separator);
+//				    sb.append(mFileName.getText());
+//
+//				    returnFilename(sb.toString());
+//				}
+//			}
+//		});
 
 		// Try to restore current path after screen rotation
 		LastConfiguration lastConfiguration = (LastConfiguration) getLastNonConfigurationInstance();
 
 		if (lastConfiguration != null) {
 		    getDir(lastConfiguration.m_strCurrentPath);
+		    // TODO: restore scroll position also
 		}
 		// New instance of FileDialog
 		else {
@@ -160,7 +182,23 @@ public class FileDialog extends ListActivity {
 		        getDir(PATH_ROOT);
 		    }
 		}
+
+
+		// Hide the titlebar if needed
+		if (options.titlebarForCurrentPath) {
+//		    myPath.setVisibility(View.GONE);
+
+			dialog.setTitle(currentPath);
+		}
+
+		dialog.show();
 	}
+
+
+	protected ListView getListView() {
+		return listview;
+	}
+
 
 	private void getDir(String dirPath) {
 
@@ -260,7 +298,7 @@ public class FileDialog extends ListActivity {
 
 		fileList.notifyDataSetChanged();
 
-		setListAdapter(fileList);
+		getListView().setAdapter(fileList);
 	}
 
 	private void addItem(ArrayList<HashMap<String, Object>> mList, String fileName, int imageId) {
@@ -270,8 +308,8 @@ public class FileDialog extends ListActivity {
 		mList.add(item);
 	}
 
-	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+
+	protected void handleListItemClick(View v, int position, long id) {
 		File file = new File(path.get(position));
 
 		setSelectVisible(v);
