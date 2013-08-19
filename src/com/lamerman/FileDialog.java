@@ -141,10 +141,6 @@ public class FileDialog extends Activity {
 	}
 
 
-	protected ListView getListView() {
-		return listview;
-	}
-
 
 	private void getDir(String dirPath) {
 
@@ -155,7 +151,7 @@ public class FileDialog extends Activity {
 		getDirImpl(dirPath);
 
 		if (position != null && useAutoSelection) {
-			getListView().setSelection(position);
+			listview.setSelection(position);
 		}
 
 	}
@@ -239,7 +235,7 @@ public class FileDialog extends Activity {
 
 		fileList.notifyDataSetChanged();
 
-		getListView().setAdapter(fileList);
+		listview.setAdapter(fileList);
 	}
 
 	private void addItem(ArrayList<HashMap<String, Object>> mList, String fileName, int imageId) {
@@ -270,7 +266,7 @@ public class FileDialog extends Activity {
 		if (file.isDirectory()) {
 			if (file.canRead()) {
 			    // Save the scroll position so users don't get confused when they come back
-				lastPositions.put(currentPath, this.getListView().getFirstVisiblePosition());
+				lastPositions.put(currentPath, listview.getFirstVisiblePosition());
 				getDir(path.get(position));
 			}
 			else {
