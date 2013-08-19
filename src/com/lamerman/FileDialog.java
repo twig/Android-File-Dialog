@@ -14,14 +14,10 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 
 public class FileDialog extends Activity {
     // @see https://code.google.com/p/android-file-dialog/issues/detail?id=3
@@ -48,14 +44,7 @@ public class FileDialog extends Activity {
 	private ListView listview;
 
 	private List<String> path;
-	private TextView myPath;
-	private EditText mFileName;
 
-	private Button selectButton;
-
-	private LinearLayout layoutSelect;
-	private LinearLayout layoutCreate;
-	private InputMethodManager inputManager;
 	private String parentPath;
 	private String currentPath = PATH_ROOT;
 
@@ -68,12 +57,13 @@ public class FileDialog extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
 		setResult(RESULT_CANCELED, getIntent());
 
 
+		RelativeLayout layout = (RelativeLayout) getLayoutInflater().inflate(R.layout.file_dialog_main, null);
 
-
-		listview = new ListView(this);
+		listview = (ListView) layout.findViewById(android.R.id.list);
 		listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> lv, View v, int pos, long id) {
@@ -85,84 +75,32 @@ public class FileDialog extends Activity {
 		// Read options
 		options = new FileDialogOptions(getIntent());
 
-
 		dialog = new AlertDialog.Builder(this)
 			.setTitle("Select file")
-			.setView(listview)
+			.setView(layout)
+			.setCancelable(false)
+			.setOnKeyListener(new DialogInterface.OnKeyListener() {
+				@Override
+				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+					if (keyCode == KeyEvent.KEYCODE_BACK) {
+						if (!currentPath.equals(PATH_ROOT)) {
+							getDir(parentPath);
+						}
+						else {
+							finish();
+						}
+
+						return true;
+					}
+
+					return false;
+				}
+			})
 			.setPositiveButton(android.R.string.ok, null)
 			.setNegativeButton(android.R.string.cancel, null)
 			.create();
 
 
-
-//		setContentView(R.layout.file_dialog_main);
-//
-//		myPath = (TextView) findViewById(R.id.path);
-//		mFileName = (EditText) findViewById(R.id.fdEditTextFile);
-
-//		inputManager = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
-//
-//		selectButton = (Button) findViewById(R.id.fdButtonSelect);
-//		selectButton.setEnabled(false);
-//		selectButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				if (selectedFile != null) {
-//				    returnFilename(selectedFile.getPath());
-//				}
-//			}
-//		});
-//
-//		final Button newButton = (Button) findViewById(R.id.fdButtonNew);
-//		newButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				setCreateVisible(v);
-//
-//				mFileName.setText("");
-//				mFileName.requestFocus();
-//			}
-//		});
-//
-//		if (!options.allowCreate) {
-//			newButton.setEnabled(false);
-//		}
-//
-//		layoutSelect = (LinearLayout) findViewById(R.id.fdLinearLayoutSelect);
-//		layoutCreate = (LinearLayout) findViewById(R.id.fdLinearLayoutCreate);
-//		layoutCreate.setVisibility(View.GONE);
-//
-//
-//		// If the New button is disabled and it's one click select, hide the selection layout.
-//		if (!options.allowCreate && options.oneClickSelect) {
-//		    layoutSelect.setVisibility(View.GONE);
-//		}
-//
-//
-//		final Button cancelButton = (Button) findViewById(R.id.fdButtonCancel);
-//		cancelButton.setOnClickListener(new OnClickListener() {
-//
-//			@Override
-//			public void onClick(View v) {
-//				setSelectVisible(v);
-//			}
-//
-//		});
-//		final Button createButton = (Button) findViewById(R.id.fdButtonCreate);
-//		createButton.setOnClickListener(new OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				if (mFileName.getText().length() > 0) {
-//				    StringBuilder sb = new StringBuilder();
-//
-//				    sb.append(currentPath);
-//				    sb.append(File.separator);
-//				    sb.append(mFileName.getText());
-//
-//				    returnFilename(sb.toString());
-//				}
-//			}
-//		});
 
 		// Try to restore current path after screen rotation
 		LastConfiguration lastConfiguration = (LastConfiguration) getLastNonConfigurationInstance();
@@ -184,14 +122,22 @@ public class FileDialog extends Activity {
 		}
 
 
-		// Hide the titlebar if needed
-		if (options.titlebarForCurrentPath) {
-//		    myPath.setVisibility(View.GONE);
+		dialog.setTitle(currentPath);
 
-			dialog.setTitle(currentPath);
-		}
 
+
+		// This sets the dialog to fill the screen all the time,
+		// so navigating doesn't make the height twitch
+//		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+//	    lp.copyFrom(dialog.getWindow().getAttributes());
+//	    lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+//	    lp.height = WindowManager.LayoutParams.MATCH_PARENT;
 		dialog.show();
+//		dialog.getWindow().setAttributes(lp);
+
+//		ViewGroup.MarginLayoutParams mlop = new ViewGroup.MarginLayoutParams(listview.getLayoutParams());
+//		mlop.height = LayoutParams.MATCH_PARENT;
+//	    listview.setLayoutParams(mlop);
 	}
 
 
@@ -238,12 +184,7 @@ public class FileDialog extends Activity {
             }
 		});
 
-		if (options.titlebarForCurrentPath) {
-		    this.setTitle(currentPath);
-		}
-		else {
-		    myPath.setText(getText(R.string.location) + ": " + currentPath);
-		}
+	    dialog.setTitle(currentPath);
 
 		/*
          * http://stackoverflow.com/questions/5090915/show-songs-from-sdcard
@@ -312,8 +253,6 @@ public class FileDialog extends Activity {
 	protected void handleListItemClick(View v, int position, long id) {
 		File file = new File(path.get(position));
 
-		setSelectVisible(v);
-
 		if (!file.exists()) {
 		    new AlertDialog.Builder(this)
                 .setIcon(R.drawable.icon)
@@ -329,80 +268,41 @@ public class FileDialog extends Activity {
 		}
 
 		if (file.isDirectory()) {
-			selectButton.setEnabled(false);
 			if (file.canRead()) {
 			    // Save the scroll position so users don't get confused when they come back
 				lastPositions.put(currentPath, this.getListView().getFirstVisiblePosition());
 				getDir(path.get(position));
-			} else {
+			}
+			else {
 				new AlertDialog.Builder(this)
-						.setIcon(R.drawable.icon)
-						.setTitle(
-								"[" + file.getName() + "] "
-										+ getText(R.string.cant_read_folder))
-						.setPositiveButton("OK",
-								new DialogInterface.OnClickListener() {
-
-									@Override
-									public void onClick(DialogInterface dialog,
-											int which) {
-
-									}
-								}).show();
+					.setIcon(R.drawable.icon)
+					.setTitle("[" + file.getName() + "] " + getText(R.string.cant_read_folder))
+					.setPositiveButton("OK", null)
+					.show();
 			}
 		}
 		else {
 			selectedFile = file;
 			v.setSelected(true);
-			selectButton.setEnabled(true);
 
-			if (options.oneClickSelect) {
-			    selectButton.performClick();
+			if (selectedFile != null) {
+			    returnFilename(selectedFile.getPath());
 			}
 		}
 	}
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-			selectButton.setEnabled(false);
+//	@Override
+//	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		if ((keyCode == KeyEvent.KEYCODE_BACK)) {
+//			if (!currentPath.equals(PATH_ROOT)) {
+//				getDir(parentPath);
+//				return true;
+//			}
+//		}
+//
+//		return super.onKeyDown(keyCode, event);
+//	}
 
-			if (layoutCreate.getVisibility() == View.VISIBLE) {
-				layoutCreate.setVisibility(View.GONE);
-				layoutSelect.setVisibility(View.VISIBLE);
-			} else {
-				if (!currentPath.equals(PATH_ROOT)) {
-					getDir(parentPath);
-				} else {
-					return super.onKeyDown(keyCode, event);
-				}
-			}
-
-			return true;
-		} else {
-			return super.onKeyDown(keyCode, event);
-		}
-	}
-
-	private void setCreateVisible(View v) {
-		layoutCreate.setVisibility(View.VISIBLE);
-		layoutSelect.setVisibility(View.GONE);
-
-		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
-		selectButton.setEnabled(false);
-	}
-
-	private void setSelectVisible(View v) {
-	    if (options.oneClickSelect) {
-	        return;
-	    }
-
-		layoutCreate.setVisibility(View.GONE);
-		layoutSelect.setVisibility(View.VISIBLE);
-
-		inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
-		selectButton.setEnabled(false);
-	}
 
 
 	private void returnFilename(String filepath) {
