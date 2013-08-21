@@ -10,6 +10,8 @@ import java.util.List;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.KeyEvent;
@@ -58,6 +60,10 @@ public class FileDialog extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getWindow().setBackgroundDrawable(new ColorDrawable(0));
+		}
+
 		setResult(RESULT_CANCELED, getIntent());
 
 
@@ -82,7 +88,7 @@ public class FileDialog extends Activity {
 			.setOnKeyListener(new DialogInterface.OnKeyListener() {
 				@Override
 				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-					if (keyCode == KeyEvent.KEYCODE_BACK) {
+					if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
 						if (!currentPath.equals(PATH_ROOT)) {
 							getDir(parentPath);
 						}
@@ -140,6 +146,16 @@ public class FileDialog extends Activity {
 //	    listview.setLayoutParams(mlop);
 	}
 
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+
+		if (dialog != null) {
+			dialog.dismiss();
+			dialog = null;
+		}
+	}
 
 
 	private void getDir(String dirPath) {
