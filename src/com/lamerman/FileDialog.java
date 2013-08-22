@@ -88,22 +88,30 @@ public class FileDialog extends Activity {
 			.setOnKeyListener(new DialogInterface.OnKeyListener() {
 				@Override
 				public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-					if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+					if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
 						if (!currentPath.equals(PATH_ROOT)) {
 							getDir(parentPath);
 						}
 						else {
 							finish();
 						}
-
-						return true;
 					}
 
-					return false;
+					return true;
 				}
 			})
-			.setPositiveButton(android.R.string.ok, null)
-			.setNegativeButton(android.R.string.cancel, null)
+			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			})
+			.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			})
 			.create();
 
 
