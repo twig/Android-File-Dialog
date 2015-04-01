@@ -22,17 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.SimpleAdapter;
 
 public class FileDialog extends Activity {
-    // @see https://code.google.com/p/android-file-dialog/issues/detail?id=3
-    // @see http://twigstechtips.blogspot.com.au/2011/11/for-my-app-moustachify-everything-i-was.html
-    // This is purely a data storage class for saving information between rotations
-    private class LastConfiguration {
-        public String m_strCurrentPath;
-
-        public LastConfiguration(String currentPath) {
-            this.m_strCurrentPath = currentPath;
-        }
-    }
-
 	private static final String ITEM_KEY = "key";
 	private static final String ITEM_IMAGE = "image";
 
@@ -101,14 +90,17 @@ public class FileDialog extends Activity {
 				}
 			})
 			.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					if (options.selectFolderMode) {
+						returnSelection(null);
+						return;
+					}
+
 					finish();
 				}
 			})
 			.setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
+				@Override public void onClick(DialogInterface dialog, int which) {
 					finish();
 				}
 			})
@@ -117,10 +109,8 @@ public class FileDialog extends Activity {
 
 
 		// Try to restore current path after screen rotation
-		LastConfiguration lastConfiguration = (LastConfiguration) getLastNonConfigurationInstance();
-
-		if (lastConfiguration != null) {
-		    getDir(lastConfiguration.m_strCurrentPath);
+		if (savedInstanceState != null) {
+		    getDir(savedInstanceState.getString("currentPath"));
 		    // TODO: restore scroll position also
 		}
 		// New instance of FileDialog
@@ -236,7 +226,8 @@ public class FileDialog extends Activity {
 			if (file.isDirectory()) {
 				listDirs.add(file);
 			}
-			else {
+			// Only add files if we're not in folder mode
+			else if (!options.selectFolderMode) {
 			    listFiles.add(file);
 			}
 		}
@@ -306,7 +297,7 @@ public class FileDialog extends Activity {
 			v.setSelected(true);
 
 			if (selectedFile != null) {
-			    returnFilename(selectedFile.getPath());
+			    returnSelection(selectedFile.getPath());
 			}
 		}
 	}
@@ -325,7 +316,7 @@ public class FileDialog extends Activity {
 
 
 
-	private void returnFilename(String filepath) {
+	private void returnSelection(String filepath) {
 	    this.options.currentPath = currentPath;
 	    this.options.selectedFile = filepath;
 
@@ -334,9 +325,19 @@ public class FileDialog extends Activity {
 	}
 
 	// Remember the information when the screen is just about to be rotated.
-	// This information can be retrieved by using getLastNonConfigurationInstance()
 	@Override
-    public Object onRetainNonConfigurationInstance() {
-	    return new LastConfiguration(this.currentPath);
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+
+		outState.putString("currentPath", this.currentPath);
+		outState.putParcelable("listview", listview.onSaveInstanceState());
+	}
+
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+
+		this.currentPath = savedInstanceState.getString("currentPath");
+		listview.onRestoreInstanceState(savedInstanceState.getParcelable("listview"));
 	}
 }
