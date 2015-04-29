@@ -1,0 +1,131 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.lamerman</groupId>
+	<artifactId>fileexplorer</artifactId>
+	<version>1.0.0</version>
+	<packaging>aar</packaging>
+	<name>File Explorer</name>
+	<description>Allows users to select files and/or folders.</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<java.version>1.6</java.version>
+		<android.platform.version>5.0.1_r2</android.platform.version>
+		<android.api.version>21</android.api.version>
+		<android.support.version>22.1.1</android.support.version>
+		<android.plugin.version>3.8.2</android.plugin.version>
+		
+        <sign.skip>true</sign.skip>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>android</groupId>
+			<artifactId>android</artifactId>
+			<version>${android.platform.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<!--
+		<dependency>
+			<groupId>android.support</groupId>
+			<artifactId>compatibility-v4</artifactId>
+			<version>${android.support.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>android.support</groupId>
+			<artifactId>compatibility-v7-appcompat</artifactId>
+			<version>${android.support.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.jakewharton</groupId>
+			<artifactId>butterknife</artifactId>
+			<version>5.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.parceler</groupId>
+			<artifactId>parceler</artifactId>
+			<version>${parceler.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.parceler</groupId>
+			<artifactId>parceler-api</artifactId>
+			<version>${parceler.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.squareup</groupId>
+			<artifactId>otto</artifactId>
+			<version>1.3.5</version>
+		</dependency>
+		-->
+	</dependencies>
+
+
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+		<sourceDirectory>src</sourceDirectory>
+		<defaultGoal>package</defaultGoal>
+		
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.1</version>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+					</configuration>
+				</plugin>
+
+				<plugin>
+					<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+					<artifactId>android-maven-plugin</artifactId>
+					<version>${android.plugin.version}</version>
+					<extensions>true</extensions>
+				</plugin>
+				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>1.0.0</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+										<artifactId>android-maven-plugin</artifactId>
+										<versionRange>[3.8.2,)</versionRange>
+										<goals><goal>consume-aar</goal></goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+
+		<plugins>
+			<plugin>
+				<groupId>com.jayway.maven.plugins.android.generation2</groupId>
+				<artifactId>android-maven-plugin</artifactId>
+				<configuration>
+					<sdk>
+						<platform>${android.api.version}</platform>
+					</sdk>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

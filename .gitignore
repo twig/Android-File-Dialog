@@ -2,3 +2,6 @@
 gen
 
 /bin
+/.settings
+/local-repo
+/target

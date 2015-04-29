@@ -1,0 +1,1 @@
+mvn install install:install-file -DlocalRepositoryPath=local-repo -DcreateChecksum=true -Dpackaging=aar -Dfile=target\fileexplorer.aar -DgroupId=com.lamerman -DartifactId=fileexplorer -Dversion=1.0.0
