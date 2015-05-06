@@ -5,3 +5,4 @@ gen
 /.settings
 /local-repo
 /target
+/lint.xml
