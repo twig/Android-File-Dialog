@@ -6,3 +6,4 @@ gen
 /local-repo
 /target
 /lint.xml
+/build
