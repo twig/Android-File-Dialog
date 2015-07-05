@@ -4,13 +4,8 @@
       android:versionCode="1"
       android:versionName="1.0">
     <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="21"/>
-    <application android:icon="@drawable/icon" android:label="@string/app_name">
-        <activity android:label="@string/app_name" android:name="com.lamerman.FileDialog" android:theme="@android:style/Theme.Translucent.NoTitleBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+    <application android:label="@string/app_name">
+        <activity android:label="@string/app_name" android:name="com.lamerman.FileDialog" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
     </application>
 </manifest>
  

@@ -266,7 +266,7 @@ public class FileDialog extends Activity {
 
 		if (!file.exists()) {
 		    new AlertDialog.Builder(this)
-                .setIcon(R.drawable.icon)
+//                .setIcon(R.drawable.icon)
                 .setTitle("Does not exist.")
                 .setMessage(file.getName())
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -286,7 +286,7 @@ public class FileDialog extends Activity {
 			}
 			else {
 				new AlertDialog.Builder(this)
-					.setIcon(R.drawable.icon)
+//					.setIcon(R.drawable.icon)
 					.setTitle("[" + file.getName() + "] " + getText(R.string.cant_read_folder))
 					.setPositiveButton("OK", null)
 					.show();
