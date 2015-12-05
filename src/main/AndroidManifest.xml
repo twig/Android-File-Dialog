@@ -3,7 +3,6 @@
       package="com.lamerman"
       android:versionCode="1"
       android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="4" android:targetSdkVersion="21"/>
     <application android:label="@string/app_name">
         <activity android:label="@string/app_name" android:name="com.lamerman.FileDialog" android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
     </application>
